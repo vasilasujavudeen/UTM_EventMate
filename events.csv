@@ -1,6 +1,11 @@
 Event,Date,Faculty,Venue
-Coding Workshop,2025-12-30,Computing,Lab 101
-Cultural Night,2025-12-28,All Faculties,Auditorium
-Career Talk,2025-12-29,Engineering,Hall A
-AI Seminar,2025-12-31,Computing,Hall B
-Sports Tournament,2025-12-27,All Faculties,Stadium
+Seminar on AI,2025-12-28,Computing,Lab 101
+Workshop on ML,2025-12-29,Engineering,Room 202
+Cultural Fest,2025-12-30,All Faculties,Auditorium
+Sports Day,2025-12-31,All Faculties,Sports Complex
+Career Fair,2026-01-02,All Faculties,Hall 1
+Data Science Workshop,2026-01-03,Computing,Lab 105
+Robotics Competition,2026-01-04,Engineering,Engineering Lab
+Music Concert,2026-01-05,All Faculties,Main Stage
+Seminar on Cybersecurity,2026-01-06,Computing,Room 210
+Art Exhibition,2026-01-07,All Faculties,Gallery
