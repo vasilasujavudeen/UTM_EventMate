@@ -60,7 +60,27 @@ elif page == "Chat with EventMate":
         if faculty != "All Faculties":
             filtered = filtered[filtered["Faculty"] == faculty]
 
-    # Display results
+   # Inside the event loop
+if not filtered.empty:
+    st.subheader("📌 Matching Events")
+    for _, row in filtered.iterrows():
+        with st.expander(f"{row['Event']} ({row['Date']})"):
+            st.write(f"🏫 **Faculty:** {row['Faculty']}")
+            st.write(f"📍 **Venue:** {row['Venue']}")
+            st.write(f"🗓 Date: {row['Date']}")
+
+            # Simulate registration
+            button_key = f"register_{row['Event']}"
+            if st.button("Register Now", key=button_key):
+                # Store registration in session state
+                if "registrations" not in st.session_state:
+                    st.session_state.registrations = []
+                if row["Event"] not in st.session_state.registrations:
+                    st.session_state.registrations.append(row["Event"])
+                    st.success(f"You have successfully registered for **{row['Event']}**!")
+                else:
+                    st.info(f"You already registered for **{row['Event']}**.")
+ # Display results
     if not filtered.empty:
         st.subheader("📌 Matching Events")
         for _, row in filtered.iterrows():
