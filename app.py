@@ -5,10 +5,10 @@ from datetime import date
 # -------------------------
 # Load Event Data
 # -------------------------
-events = pd.read_csv("events.csv")
+events = pd.read_csv("events.csv")  # Make sure you have a 'Category' column
 
 # -------------------------
-# Session State Init
+# Session State
 # -------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -17,10 +17,10 @@ if "user_name" not in st.session_state:
 if "registered_events" not in st.session_state:
     st.session_state.registered_events = []
 if "recommended_events" not in st.session_state:
-    st.session_state.recommended_events = events.sample(3, random_state=1)
+    st.session_state.recommended_events = events.sample(3, random_state=1)  # Stable recommended
 
 # -------------------------
-# LOGIN
+# LOGIN SCREEN
 # -------------------------
 if not st.session_state.logged_in:
     st.title("🎓 UTM EventMate")
@@ -35,10 +35,10 @@ if not st.session_state.logged_in:
             st.session_state.user_name = name
             st.rerun()
         else:
-            st.warning("Please enter both fields")
+            st.warning("Please enter both name and matric number")
 
 # -------------------------
-# MAIN APP
+# MAIN APPLICATION
 # -------------------------
 else:
     st.sidebar.title("📌 Navigation")
@@ -48,17 +48,17 @@ else:
     )
 
     # -------------------------
-    # HOME
+    # HOME SCREEN
     # -------------------------
     if page == "Home":
         st.title("🏫 UTM EventMate")
         st.write(f"Welcome, **{st.session_state.user_name}** 👋")
-
         st.markdown("""
-        - 💬 Chat with EventMate  
-        - 📂 Browse Event Categories  
-        - ⭐ View Recommended Events  
-        - ⚙️ Personalize Settings  
+        **What can EventMate help you with?**
+        - 💬 Chat with EventMate
+        - 📂 Browse Event Categories
+        - ⭐ View Recommended Events
+        - ⚙️ Personalize Settings
         """)
 
     # -------------------------
@@ -66,61 +66,72 @@ else:
     # -------------------------
     elif page == "Chat with EventMate":
         st.title("💬 Chat with EventMate")
+        st.write("Hello! Ask me about campus events 👇")
+
+        # Quick options
+        option = st.selectbox(
+            "Quick options",
+            ["Custom Search", "Events Today", "Faculty Events"]
+        )
 
         faculty = st.selectbox(
-            "Filter by Faculty",
-            ["All", "Computing", "Engineering", "Science"]
+            "Select Faculty",
+            ["All Faculties", "Computing", "Engineering", "Science"]
         )
 
         selected_date = st.date_input("Select Date", date.today())
 
+        # Filter logic
         filtered = events.copy()
 
-        if faculty != "All":
+        if option == "Events Today":
+            filtered = filtered[filtered["Date"] == str(date.today())]
+
+        if option == "Faculty Events" and faculty != "All Faculties":
             filtered = filtered[filtered["Faculty"] == faculty]
 
-        filtered = filtered[filtered["Date"] >= str(selected_date)]
+        if option == "Custom Search":
+            filtered = filtered[filtered["Date"] == str(selected_date)]
+            if faculty != "All Faculties":
+                filtered = filtered[filtered["Faculty"] == faculty]
 
-        st.subheader("📅 Available Events")
-
-        if filtered.empty:
-            st.warning("No events found.")
-        else:
+        # Output Events
+        if not filtered.empty:
+            st.subheader("📌 Matching Events")
             for i, row in filtered.iterrows():
                 with st.expander(f"{row['Event']} ({row['Date']})"):
                     st.write(f"📂 Category: {row['Category']}")
                     st.write(f"🏫 Faculty: {row['Faculty']}")
                     st.write(f"📍 Venue: {row['Venue']}")
 
+                    # Register button
                     if row["Event"] in st.session_state.registered_events:
                         st.success("✅ You are registered")
                     else:
-                        if st.button("Register Now", key=f"reg_{i}"):
+                        if st.button("Register Now", key=f"chat_reg_{i}"):
                             st.session_state.registered_events.append(row["Event"])
                             st.success("🎉 Registration successful")
+        else:
+            st.warning("No events found for your selection.")
 
-        # -------------------------
-        # RECOMMENDED EVENTS (FIXED)
-        # -------------------------
+        # Recommended Events
         st.subheader("⭐ Recommended for You")
         for row in st.session_state.recommended_events.itertuples():
             st.info(f"{row.Event} | {row.Date} | {row.Category}")
 
     # -------------------------
-    # EVENT CATEGORIES (FIXED)
+    # EVENT CATEGORIES
     # -------------------------
     elif page == "Event Categories":
         st.title("📂 Event Categories")
+        st.write("Select a category to view events")
 
-        category = st.radio(
-            "Choose a category",
-            events["Category"].unique()
-        )
+        categories = events["Category"].unique()
+        category = st.radio("Choose Category", categories)
 
         cat_events = events[events["Category"] == category]
 
         st.subheader(f"📌 {category} Events")
-
         for i, row in cat_events.iterrows():
             with st.expander(f"{row['Event']} ({row['Date']})"):
                 st.write(f"🏫 Faculty: {row['Faculty']}")
@@ -129,23 +140,22 @@ else:
                 if row["Event"] in st.session_state.registered_events:
                     st.success("✅ You are registered")
                 else:
-                    if st.button("Register Now", key=f"cat_{i}"):
+                    if st.button("Register Now", key=f"cat_reg_{i}"):
                         st.session_state.registered_events.append(row["Event"])
                         st.success("🎉 Registration successful")
 
     # -------------------------
-    # SETTINGS
+    # SETTINGS SCREEN
     # -------------------------
     elif page == "Settings":
         st.title("⚙️ Settings")
-
         st.markdown("**Interests**")
         st.multiselect(
             "Select interests",
             ["Academic Talks", "Workshops", "Sports & Recreation", "Career Events", "Cultural Events"]
         )
 
-        st.checkbox("Enable notifications")
+        st.markdown("**Notifications**")
         st.checkbox("Enable event reminders")
 
         st.markdown("**Privacy**")
